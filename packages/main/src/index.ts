@@ -1,6 +1,7 @@
 import {app} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
+import { closeDatabase, initDatabase } from './database';
 
 /**
  * Prevent electron from running multiple instances.
@@ -21,6 +22,7 @@ app.disableHardwareAcceleration();
  * Shout down background process if all windows was closed
  */
 app.on('window-all-closed', () => {
+  closeDatabase();
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -64,3 +66,9 @@ if (import.meta.env.PROD) {
     .then(({autoUpdater}) => autoUpdater.checkForUpdatesAndNotify())
     .catch(e => console.error('Failed check updates:', e));
 }
+
+app
+  .whenReady()
+  .then(() => {
+    initDatabase(app);
+  });
