@@ -20,6 +20,7 @@ const config = {
   resolve: {
     alias: {
       '/@/': join(PACKAGE_ROOT, 'src') + '/',
+      '~bootstrap': join(PACKAGE_ROOT, '../../node_modules/bootstrap'),
     },
   },
   base: '',
