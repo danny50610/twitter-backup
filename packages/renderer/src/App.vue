@@ -1,9 +1,19 @@
 <script lang="ts" setup>
+
 import ReactiveCounter from '/@/components/ReactiveCounter.vue';
 import ReactiveHash from '/@/components/ReactiveHash.vue';
 import ElectronVersions from '/@/components/ElectronVersions.vue';
 
 const APP_VERSION = import.meta.env.VITE_APP_VERSION;
+
+function fetchTwitterUserLiked() {
+  window.electronAPI.fetchTwitterUserLiked();
+}
+
+// function test2() {
+//   window.electronAPI.test2();
+// }
+
 </script>
 
 <template>
@@ -17,6 +27,9 @@ const APP_VERSION = import.meta.env.VITE_APP_VERSION;
     <!-- Example how to inject current app version to UI -->
     App version: {{ APP_VERSION }}
   </p>
+
+  <button @click="fetchTwitterUserLiked">Test</button>
+  <!-- <button @click="test2">Test 2</button> -->
 
   <p>
     For a guide and recipes on how to configure / customize this project,<br />

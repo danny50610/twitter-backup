@@ -1,7 +1,8 @@
-import {app} from 'electron';
+import {app, ipcMain} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
-import { closeDatabase, initDatabase } from './database';
+import { closeDatabase, initDatabase, addTweet } from './database';
+import axios from 'axios';
 
 /**
  * Prevent electron from running multiple instances.
@@ -67,8 +68,55 @@ if (import.meta.env.PROD) {
     .catch(e => console.error('Failed check updates:', e));
 }
 
+async function fetchTwitterUserLiked() {
+  const userId = '957886038839648256'; // https://twitter.com/thePrimalSpace
+
+  let paginationToken = null;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const params: {[k: string]: any} = {
+      'tweet.fields': 'created_at,author_id,entities,attachments',
+    };
+
+    if (paginationToken != null) {
+      params.pagination_token = paginationToken;
+    }
+
+    const response = await axios.get(`https://api.twitter.com/2/users/${userId}/liked_tweets`, {
+      headers: {
+        'Authorization': 'Bearer ' + import.meta.env.VITE_TWITTER_TOKEN,
+      },
+      params,
+    });
+
+    const data = response.data;
+
+    if (data.data) {
+      data.data.forEach((tweet: any) => {
+        addTweet(tweet.id, tweet);
+      });
+    }
+
+    if (data.meta.next_token === undefined) {
+      break;
+    } else {
+      paginationToken = data.meta.next_token;
+    }
+  }
+}
+
+// async function test2() {
+//   addTweet('1111', {'AAA': 'BBB'});
+//   addTweet('1111', {'AAA': 'CCC'});
+//   addTweet('1112', {'AAA': 'BBB'});
+// }
+
 app
   .whenReady()
   .then(() => {
     initDatabase(app);
+
+    ipcMain.handle('fetchTwitterUserLiked', fetchTwitterUserLiked);
+
+    // ipcMain.handle('test2', test2);
   });
