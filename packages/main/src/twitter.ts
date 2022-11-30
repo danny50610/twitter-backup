@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { addTweet } from './database';
+import { addTweet, getTweetPagination } from './database';
 
 export async function fetchTwitterUserLiked() {
   const userId = import.meta.env.VITE_USER_ID;
@@ -65,8 +65,7 @@ export async function fetchTwitterUserLiked() {
   }
 }
 
-// export async function test2() {
-//   addTweet('1111', {'AAA': 'BBB'});
-//   addTweet('1111', {'AAA': 'CCC'});
-//   addTweet('1112', {'AAA': 'BBB'});
-// }
+export async function getTweet(beforeId: string | null, beforeCreatedAt: string | null) {
+  return await getTweetPagination(beforeId, beforeCreatedAt);
+}
+

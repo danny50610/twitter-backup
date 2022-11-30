@@ -53,3 +53,31 @@ export async function addTweet(id: string, data: any) {
     });
   }
 }
+
+export async function getTweetPagination(beforeId: string | null, beforeCreatedAt: string | null)
+{
+  return await new Promise((resolve, reject) => {
+    let sql = 'SELECT * FROM tweet';
+    const params: {[k: string]: any} = {};
+
+    if (beforeId !== null && beforeCreatedAt !== null) {
+      sql += " WHERE (json_extract(data, '$.created_at') = $created_at AND id < $id) OR json_extract(data, '$.created_at') < $created_at";
+      params.$id = beforeId;
+      params.$created_at = beforeCreatedAt;
+    }
+
+    sql += " ORDER BY json_extract(data, '$.created_at') DESC, id DESC LIMIT 10;";
+
+    db.all(sql, params, function(err, rows) {
+      if (err) {
+        reject(err);
+      }
+
+      rows.forEach((row) => {
+        row.data = JSON.parse(row.data);
+      });
+
+      resolve(rows);
+    });
+  });
+}
