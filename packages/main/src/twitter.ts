@@ -1,11 +1,19 @@
 import axios from 'axios';
-import { addTweet, getTweetPagination } from './database';
+import { app } from 'electron';
+import { addMedia, addTweet, getTweetPagination } from './database';
+import { join } from 'node:path';
+const fs = require('node:fs');
+const url = require('node:url');
 
 export async function fetchTwitterUserLiked() {
   const userId = import.meta.env.VITE_USER_ID;
 
+  const appPath = app.getPath('userData');
+  const mediaPath = join(appPath, 'media');
+  fs.mkdirSync(mediaPath, { recursive: true });
+
   let count = 0;
-  const maxCount = 222;
+  const maxCount = 222; // TODO: remove
   let paginationToken = null;
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -50,7 +58,22 @@ export async function fetchTwitterUserLiked() {
       });
     }
 
-    // TODO: data.includes.media
+    if (data?.includes?.media) {
+      data.includes.media.forEach(async (media: any) => {
+        addMedia(media.media_key, media);
+
+        const type = media.type;
+        if (type == 'photo') {
+          const mediaResponse = await axios.get(media.url, {
+            responseType: 'arraybuffer',
+          });
+
+          const filename = url.parse(media.url).pathname.split('/').at(-1);
+          fs.writeFileSync(join(mediaPath, filename), mediaResponse.data);
+        }
+        // TODO: video
+      });
+    }
 
     count += data.meta.result_count ?? 0;
     if (count > maxCount) {

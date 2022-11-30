@@ -71,7 +71,7 @@ if (import.meta.env.PROD) {
 app
   .whenReady()
   .then(() => {
-    initDatabase(app);
+    initDatabase();
 
     ipcMain.handle('fetchTwitterUserLiked', fetchTwitterUserLiked);
     ipcMain.handle('getTweet', (_event, ...args) => { return getTweet(args[0], args[1]); });
