@@ -25,6 +25,7 @@ export async function addTweet(id: string, data: any) {
     db.get('SELECT EXISTS(SELECT 1 FROM tweet WHERE id = ?);', [id], function (err, row) {
       if (err) {
         reject(err);
+        return;
       }
 
       resolve((Boolean)(Object.values(row)[0]));
@@ -38,6 +39,7 @@ export async function addTweet(id: string, data: any) {
       db.run('UPDATE tweet SET data = ?, updated_at = ? WHERE id = ?;', [jsonData, updatedAt, id], function (err) {
         if (err) {
           reject(err);
+          return;
         }
 
         resolve(true);
@@ -48,6 +50,7 @@ export async function addTweet(id: string, data: any) {
       db.run('INSERT INTO tweet (id, data, updated_at) VALUES (?, ?, ?);', [id, jsonData, updatedAt], function (err) {
         if (err) {
           reject(err);
+          return;
         }
 
         resolve(true);
@@ -61,6 +64,7 @@ export async function addMedia(id: string, data: any) {
     db.get('SELECT EXISTS(SELECT 1 FROM media WHERE id = ?);', [id], function (err, row) {
       if (err) {
         reject(err);
+        return;
       }
 
       resolve((Boolean)(Object.values(row)[0]));
@@ -74,6 +78,7 @@ export async function addMedia(id: string, data: any) {
       db.run('UPDATE media SET data = ?, updated_at = ? WHERE id = ?;', [jsonData, updatedAt, id], function (err) {
         if (err) {
           reject(err);
+          return;
         }
 
         resolve(true);
@@ -84,6 +89,7 @@ export async function addMedia(id: string, data: any) {
       db.run('INSERT INTO media (id, data, updated_at) VALUES (?, ?, ?);', [id, jsonData, updatedAt], function (err) {
         if (err) {
           reject(err);
+          return;
         }
 
         resolve(true);
@@ -94,7 +100,7 @@ export async function addMedia(id: string, data: any) {
 
 export async function getTweetPagination(beforeId: string | null, beforeCreatedAt: string | null)
 {
-  return await new Promise((resolve, reject) => {
+  let tweets = await new Promise((resolve, reject) => {
     let sql = 'SELECT * FROM tweet';
     const params: {[k: string]: any} = {};
 
@@ -109,6 +115,45 @@ export async function getTweetPagination(beforeId: string | null, beforeCreatedA
     db.all(sql, params, function(err, rows) {
       if (err) {
         reject(err);
+        return;
+      }
+
+      rows.forEach((row) => {
+        row.data = JSON.parse(row.data);
+      });
+
+      resolve(rows);
+    });
+  });
+
+  tweets = await Promise.all(tweets.map(async (tweet: any) => {
+      const media = tweet.data?.attachments?.media_keys != undefined ? await getMedia(tweet.data.attachments.media_keys) : [];
+
+      return {
+        tweet: tweet,
+        media: media,
+      };
+  }));
+
+  return tweets;
+}
+
+function getMedia(mediaKeys: Array<string>) {
+  return new Promise((resolve, reject) => {
+    let sql = 'SELECT * FROM media WHERE id IN (';
+    const count = mediaKeys.length;
+    for (let i = 0; i < count; i++) {
+      sql += '?';
+      if (i != count - 1) {
+        sql += ',';
+      }
+    }
+    sql += ');';
+
+    db.all(sql, mediaKeys, function(err, rows) {
+      if (err) {
+        reject(err);
+        return;
       }
 
       rows.forEach((row) => {

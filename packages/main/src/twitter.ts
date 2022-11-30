@@ -1,16 +1,12 @@
 import axios from 'axios';
-import { app } from 'electron';
 import { addMedia, addTweet, getTweetPagination } from './database';
 import { join } from 'node:path';
+import { mediaPath } from './config';
 const fs = require('node:fs');
 const url = require('node:url');
 
 export async function fetchTwitterUserLiked() {
   const userId = import.meta.env.VITE_USER_ID;
-
-  const appPath = app.getPath('userData');
-  const mediaPath = join(appPath, 'media');
-  fs.mkdirSync(mediaPath, { recursive: true });
 
   let count = 0;
   const maxCount = 222; // TODO: remove
@@ -60,15 +56,18 @@ export async function fetchTwitterUserLiked() {
 
     if (data?.includes?.media) {
       data.includes.media.forEach(async (media: any) => {
-        addMedia(media.media_key, media);
-
         const type = media.type;
+
         if (type == 'photo') {
+          const filename = url.parse(media.url).pathname.split('/').at(-1);
+          media.filename = filename;
+
+          addMedia(media.media_key, media);
+
           const mediaResponse = await axios.get(media.url, {
             responseType: 'arraybuffer',
           });
 
-          const filename = url.parse(media.url).pathname.split('/').at(-1);
           fs.writeFileSync(join(mediaPath, filename), mediaResponse.data);
         }
         // TODO: video

@@ -22,7 +22,6 @@ function fetchTwitterUserLiked() {
 async function test2() {
   let tweets = await window.electronAPI.getTweet();
   tweets.forEach((tweet) => {
-    console.log(tweet.id);
     tweetList.push(tweet);
   });
   console.log('====================');
@@ -50,10 +49,13 @@ async function test2() {
       Test2
     </button>
     <div class="row justify-content-center">
-      <div class="col-6">
-        <div v-for="tweet in tweetList" :key="tweet.id" class="card my-2">
+      <div class="col-xl-6">
+        <div v-for="tweet in tweetList" :key="tweet.tweet.id" class="card my-2">
           <div class="card-body">
-            <p style="white-space: pre;">{{ tweet.data.text }}</p>
+            <p style="white-space: pre;">{{ tweet.tweet.data.text }}</p>
+            <template v-for="media in tweet.media" :key="media.id">
+              <img v-if="media.data?.url" :src="('media://' + media.data.filename)">
+            </template>
           </div>
         </div>
       </div>

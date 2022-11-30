@@ -1,8 +1,9 @@
-import {app, ipcMain} from 'electron';
+import {app, ipcMain, protocol} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import { closeDatabase, initDatabase } from './database';
 import { fetchTwitterUserLiked, getTweet } from './twitter';
+import { initConfig, mediaPath } from './config';
 
 /**
  * Prevent electron from running multiple instances.
@@ -71,8 +72,20 @@ if (import.meta.env.PROD) {
 app
   .whenReady()
   .then(() => {
+    initConfig();
     initDatabase();
 
     ipcMain.handle('fetchTwitterUserLiked', fetchTwitterUserLiked);
     ipcMain.handle('getTweet', (_event, ...args) => { return getTweet(args[0], args[1]); });
+
+    protocol.registerFileProtocol('media', (request, callback) => {
+      const url = request.url.replace('media://', mediaPath + '/');
+      try {
+        return callback(url);
+      }
+      catch (error) {
+        console.error(error);
+        return callback('404');
+      }
+    });
   });
