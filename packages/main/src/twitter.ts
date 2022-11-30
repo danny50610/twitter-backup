@@ -26,6 +26,7 @@ export async function fetchTwitterUserLiked() {
         'url',
         'width',
         'alt_text',
+        'variants',
       ].join(','),
       'expansions': 'attachments.media_keys',
     };
