@@ -1,27 +1,65 @@
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 
 const tweetList = reactive([]);
+
+let tweetEndObserver;
+let isLoadingMore = false;
+
+onMounted(() => {
+  loadTweet().then(() => {
+    nextTick().then(() => {
+        setUpInterSectionObserver();
+    });
+  });
+});
+
+onUnmounted(() => {
+  if (tweetEndObserver) {
+    tweetEndObserver.disconnect();
+  }
+});
 
 async function fetchTwitterUserLiked() {
   await window.electronAPI.fetchTwitterUserLiked();
   console.log('Done');
 }
 
-// async function getTweet() {
+async function loadTweet() {
+  isLoadingMore = true;
 
-// }
+  let beforeId = null;
+  let beforeCreatedAt = null;
+  const tweetLength = tweetList.length;
+  if (tweetLength > 0) {
+    beforeId = tweetList[tweetLength - 1].tweet.id;
+    beforeCreatedAt =  tweetList[tweetLength - 1].tweet.data.created_at;
+  }
 
-async function test2() {
-  let tweets = await window.electronAPI.getTweet();
+  let tweets = await window.electronAPI.getTweet(beforeId, beforeCreatedAt);
   tweets.forEach((tweet: any) => {
     tweetList.push(tweet);
   });
-  console.log('====================');
-  // let tweets2 = await window.electronAPI.getTweet('1596435606229639169', '2022-11-26T09:28:03.000Z');
-  // tweets2.forEach((tweet) => {
-  //   console.log(tweet.id);
-  // });
+
+  isLoadingMore = false;
+}
+
+const sentinel = ref(null);
+function setUpInterSectionObserver() {
+  tweetEndObserver = new IntersectionObserver(
+    handleIntersection,
+    {
+      rootMargin: '500px',
+    },
+  );
+
+  tweetEndObserver.observe(sentinel.value);
+}
+
+function handleIntersection([entry]: IntersectionObserverEntry[]) {
+  if (entry.isIntersecting && !isLoadingMore) {
+    loadTweet();
+  }
 }
 
 </script>
@@ -33,15 +71,9 @@ async function test2() {
       class="btn btn-primary"
       @click="fetchTwitterUserLiked"
     >
-      手動抓取
+      開始備份
     </button>
-    <button
-      class="btn btn-primary"
-      @click="test2"
-    >
-      Test2
-    </button>
-    <div class="row justify-content-center">
+    <div class="row justify-content-center" ref="scrollContainer">
       <div class="col-xl-6">
         <div v-for="tweet in tweetList" :key="tweet.tweet.id" class="card my-2">
           <div class="card-body">
@@ -54,6 +86,7 @@ async function test2() {
             </div>
           </div>
         </div>
+        <div ref="sentinel" class="sentinel"></div>
       </div>
     </div>
   </div>
@@ -69,5 +102,9 @@ async function test2() {
   height: 100%;
   width: 100%;
   object-fit: contain;
+}
+
+.sentinel {
+  height: 0px;
 }
 </style>
