@@ -1,10 +1,9 @@
-import { app } from 'electron';
 import { join } from 'path';
 const fs = require('node:fs');
 
-const appPath = app.getPath('userData');
-export const mediaPath = join(appPath, 'media');
+export let photoPath: string;
 
-export function initConfig() {
-  fs.mkdirSync(mediaPath, { recursive: true });
+export function initConfig(appPath: string) {
+  photoPath = join(appPath, 'media', 'photo');
+  fs.mkdirSync(photoPath, { recursive: true });
 }

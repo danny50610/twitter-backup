@@ -1,18 +1,11 @@
 <script lang="ts" setup>
-
-// import ReactiveCounter from '/@/components/ReactiveCounter.vue';
-// import ReactiveHash from '/@/components/ReactiveHash.vue';
-// import ElectronVersions from '/@/components/ElectronVersions.vue';
-
 import { reactive } from 'vue';
-
-// const APP_VERSION = import.meta.env.VITE_APP_VERSION;
 
 const tweetList = reactive([]);
 
-function fetchTwitterUserLiked() {
-  window.electronAPI.fetchTwitterUserLiked();
-  console.log('Done'); // TOOD: wait
+async function fetchTwitterUserLiked() {
+  await window.electronAPI.fetchTwitterUserLiked();
+  console.log('Done');
 }
 
 // async function getTweet() {
@@ -21,7 +14,7 @@ function fetchTwitterUserLiked() {
 
 async function test2() {
   let tweets = await window.electronAPI.getTweet();
-  tweets.forEach((tweet) => {
+  tweets.forEach((tweet: any) => {
     tweetList.push(tweet);
   });
   console.log('====================');
@@ -53,9 +46,12 @@ async function test2() {
         <div v-for="tweet in tweetList" :key="tweet.tweet.id" class="card my-2">
           <div class="card-body">
             <p style="white-space: pre;">{{ tweet.tweet.data.text }}</p>
-            <template v-for="media in tweet.media" :key="media.id">
-              <img v-if="media.data?.url" :src="('media://' + media.data.filename)">
-            </template>
+            <div v-for="media in tweet.media" :key="media.id" class="media-photo">
+              <img v-if="media.data?.url" :src="('media-photo://' + media.data.filename)" class="rounded"
+                :height="media.data.height"
+                :width="media.data.width"
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -64,5 +60,14 @@ async function test2() {
 </template>
 
 <style>
+.media-photo {
+  height: 510px;
+  width: auto;
+}
 
+.media-photo img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
 </style>

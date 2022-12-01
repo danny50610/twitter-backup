@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { addMedia, addTweet, getTweetPagination } from './database';
 import { join } from 'node:path';
-import { mediaPath } from './config';
+import { photoPath } from './config';
 const fs = require('node:fs');
 const url = require('node:url');
 
@@ -58,6 +58,10 @@ export async function fetchTwitterUserLiked() {
       data.includes.media.forEach(async (media: any) => {
         const type = media.type;
 
+        // TODO: 提出共用，整理 media 到下一層路徑
+        // - xxxxx
+        //   - photo
+        //   - video
         if (type == 'photo') {
           const filename = url.parse(media.url).pathname.split('/').at(-1);
           media.filename = filename;
@@ -68,7 +72,7 @@ export async function fetchTwitterUserLiked() {
             responseType: 'arraybuffer',
           });
 
-          fs.writeFileSync(join(mediaPath, filename), mediaResponse.data);
+          fs.writeFileSync(join(photoPath, filename), mediaResponse.data);
         }
         // TODO: video
       });

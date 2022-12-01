@@ -3,7 +3,7 @@ import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import { closeDatabase, initDatabase } from './database';
 import { fetchTwitterUserLiked, getTweet } from './twitter';
-import { initConfig, mediaPath } from './config';
+import { initConfig, photoPath } from './config';
 
 /**
  * Prevent electron from running multiple instances.
@@ -72,14 +72,16 @@ if (import.meta.env.PROD) {
 app
   .whenReady()
   .then(() => {
-    initConfig();
-    initDatabase();
+    const appPath = app.getPath('userData');
+
+    initConfig(appPath);
+    initDatabase(appPath);
 
     ipcMain.handle('fetchTwitterUserLiked', fetchTwitterUserLiked);
     ipcMain.handle('getTweet', (_event, ...args) => { return getTweet(args[0], args[1]); });
 
-    protocol.registerFileProtocol('media', (request, callback) => {
-      const url = request.url.replace('media://', mediaPath + '/');
+    protocol.registerFileProtocol('media-photo', (request, callback) => {
+      const url = request.url.replace('media-photo://', photoPath + '/');
       try {
         return callback(url);
       }

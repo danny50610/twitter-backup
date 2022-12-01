@@ -4,8 +4,7 @@ const path = require('node:path');
 
 let db: Database;
 
-export function initDatabase() {
-  const appPath = app.getPath('userData');
+export function initDatabase(appPath: string) {
   const dbPath = path.resolve(appPath, 'data.sqlite3');
 
   db = new Database(dbPath);
