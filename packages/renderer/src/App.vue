@@ -9,7 +9,7 @@ let isLoadingMore = false;
 onMounted(() => {
   loadTweet().then(() => {
     nextTick().then(() => {
-        setUpInterSectionObserver();
+      setUpInterSectionObserver();
     });
   });
 });
@@ -73,11 +73,11 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
     >
       開始備份
     </button>
-    <div class="row justify-content-center" ref="scrollContainer">
+    <div class="row justify-content-center">
       <div class="col-xl-6">
         <div v-for="tweet in tweetList" :key="tweet.tweet.id" class="card my-2">
           <div class="card-body">
-            <p style="white-space: pre;">{{ tweet.tweet.data.text }}</p>
+            <p style="white-space: pre-wrap;" class="card-text">{{ tweet.tweet.data.text }}</p>
             <div v-for="media in tweet.media" :key="media.id" class="media-photo">
               <img v-if="media.data?.url" :src="('media-photo://' + media.data.filename)" class="rounded"
                 :height="media.data.height"
