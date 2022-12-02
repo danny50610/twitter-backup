@@ -75,14 +75,26 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
     </button>
     <div class="row justify-content-center">
       <div class="col-xl-6">
-        <div v-for="tweet in tweetList" :key="tweet.tweet.id" class="card my-2">
+        <div class="card my-2" v-for="tweet in tweetList" :key="tweet.tweet.id">
           <div class="card-body">
-            <p style="white-space: pre-wrap;" class="card-text">{{ tweet.tweet.data.text }}</p>
-            <div v-for="media in tweet.media" :key="media.id" class="media-photo">
-              <img v-if="media.data?.url" :src="('media-photo://' + media.data.filename)" class="rounded"
-                :height="media.data.height"
-                :width="media.data.width"
-              >
+            <div class="d-flex">
+              <div class="user">AAA</div>
+              <div class="tweet-content">
+                <div class="mb-2">
+                  <!-- FIXME: overflow -->
+                  <span class="me-1">{{ tweet.user.data.name }}</span>
+                  <span class="me-1">@{{ tweet.user.data.username }}</span>
+                  <span class="me-1">·</span>
+                  <span>{{ tweet.tweet.data.created_at }}</span>
+                </div>
+                <p style="white-space: pre-wrap;" class="card-text">{{ tweet.tweet.data.text }}</p>
+                <div v-for="media in tweet.media" :key="media.id" class="media-photo">
+                  <img v-if="media.data?.url" :src="('media-photo://' + media.data.filename)" class="rounded"
+                       :height="media.data.height"
+                       :width="media.data.width"
+                  >
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -106,5 +118,16 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
 
 .sentinel {
   height: 0px;
+}
+
+.user {
+  flex-basis: 48px;
+  flex-grow: 0;
+  margin-right: 12px
+}
+
+.tweet-content {
+  flex-basis: 0px;
+  flex-grow: 1;
 }
 </style>

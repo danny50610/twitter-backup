@@ -1,4 +1,3 @@
-import { app } from 'electron';
 import { Database } from 'sqlite3';
 const path = require('node:path');
 
@@ -12,6 +11,7 @@ export function initDatabase(appPath: string) {
   db.serialize(() => {
     db.run('CREATE TABLE IF NOT EXISTS tweet (id TEXT PRIMARY KEY, data JSON, updated_at INTEGER)');
     db.run('CREATE TABLE IF NOT EXISTS media (id TEXT PRIMARY KEY, data JSON, updated_at INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS user (id TEXT PRIMARY KEY, data JSON, updated_at INTEGER)');
   });
 }
 
@@ -97,6 +97,45 @@ export async function addMedia(id: string, data: any) {
   }
 }
 
+export async function addUser(id: string, data: any) {
+  const isUserExist = await new Promise((resolve, reject) => {
+    db.get('SELECT EXISTS(SELECT 1 FROM user WHERE id = ?);', [id], function (err, row) {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve((Boolean)(Object.values(row)[0]));
+    });
+  });
+
+  const jsonData = JSON.stringify(data);
+  const updatedAt = Math.floor(Date.now() / 1000);
+  if (isUserExist) {
+    await new Promise((resolve, reject) => {
+      db.run('UPDATE user SET data = ?, updated_at = ? WHERE id = ?;', [jsonData, updatedAt, id], function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(true);
+      });
+    });
+  } else {
+    await new Promise((resolve, reject) => {
+      db.run('INSERT INTO user (id, data, updated_at) VALUES (?, ?, ?);', [id, jsonData, updatedAt], function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(true);
+      });
+    });
+  }
+}
+
 export async function getTweetPagination(beforeId: string | null, beforeCreatedAt: string | null)
 {
   let tweets = await new Promise((resolve, reject) => {
@@ -127,10 +166,12 @@ export async function getTweetPagination(beforeId: string | null, beforeCreatedA
 
   tweets = await Promise.all(tweets.map(async (tweet: any) => {
       const media = tweet.data?.attachments?.media_keys != undefined ? await getMedia(tweet.data.attachments.media_keys) : [];
+      const user = await getUser(tweet.data.author_id);
 
       return {
         tweet: tweet,
         media: media,
+        user: user,
       };
   }));
 
@@ -160,6 +201,21 @@ function getMedia(mediaKeys: Array<string>) {
       });
 
       resolve(rows);
+    });
+  });
+}
+
+function getUser(id: string) {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM user WHERE id = ?;', [id], function (err, row) {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      row.data = JSON.parse(row.data);
+
+      resolve(row);
     });
   });
 }

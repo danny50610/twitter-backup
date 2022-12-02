@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { addMedia, addTweet, getTweetPagination } from './database';
+import { addMedia, addTweet, addUser, getTweetPagination } from './database';
 import { join } from 'node:path';
 import { photoPath } from './config';
 const fs = require('node:fs');
@@ -32,7 +32,13 @@ export async function fetchTwitterUserLiked() {
         'alt_text',
         'variants',
       ].join(','),
-      'expansions': 'attachments.media_keys',
+      'user.fields': [
+        'id',
+        'name',
+        'username',
+        'profile_image_url',
+      ].join(','),
+      'expansions': 'attachments.media_keys,author_id',
     };
 
     if (paginationToken != null) {
@@ -75,6 +81,12 @@ export async function fetchTwitterUserLiked() {
           fs.writeFileSync(join(photoPath, filename), mediaResponse.data);
         }
         // TODO: video
+      });
+    }
+
+    if (data?.includes?.users) {
+      data.includes.users.forEach(async (user: any) => {
+        addUser(user.id, user);
       });
     }
 
