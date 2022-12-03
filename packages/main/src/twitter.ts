@@ -70,7 +70,9 @@ export async function fetchTwitterUserLiked() {
           downloadFile(media.preview_image_url, join(twitterFilePath, url.parse(media.preview_image_url).pathname));
 
           const videoUrl = findMaxBitRateMp4Url(media);
-          downloadFile(videoUrl, join(twitterVideoPath, url.parse(videoUrl).pathname));
+          if (videoUrl != null) {
+            downloadFile(videoUrl, join(twitterVideoPath, url.parse(videoUrl).pathname));
+          }
         }
       });
     }

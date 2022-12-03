@@ -138,7 +138,7 @@ export async function addUser(id: string, data: any) {
 
 export async function getTweetPagination(beforeId: string | null, beforeCreatedAt: string | null)
 {
-  let tweets = await new Promise((resolve, reject) => {
+  let tweets: Array<any> = await new Promise((resolve, reject) => {
     let sql = 'SELECT * FROM tweet';
     const params: {[k: string]: any} = {};
 
