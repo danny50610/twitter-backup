@@ -9,7 +9,6 @@ export async function fetchTwitterUserLiked() {
   const userId = import.meta.env.VITE_USER_ID;
 
   let count = 0;
-  const maxCount = 222; // TODO: remove
   let paginationToken = null;
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -84,9 +83,7 @@ export async function fetchTwitterUserLiked() {
     }
 
     count += data.meta.result_count ?? 0;
-    if (count > maxCount) {
-      break;
-    }
+    console.log(count);
 
     if (data.meta.next_token === undefined) {
       break;
