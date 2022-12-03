@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { addMedia, addTweet, addUser, getTweetPagination } from './database';
 import { join, dirname } from 'node:path';
-import { twitterFilePath } from './config';
+import { twitterFilePath, twitterVideoPath } from './config';
 const fs = require('node:fs');
 const url = require('node:url');
 
@@ -64,15 +64,15 @@ export async function fetchTwitterUserLiked() {
       data.includes.media.forEach(async (media: any) => {
         const type = media.type;
 
-        // TODO: 提出共用，整理 media 到下一層路徑
-        // - xxxxx
-        //   - photo
-        //   - video
+        addMedia(media.media_key, media);
         if (type == 'photo') {
-          addMedia(media.media_key, media);
           downloadFile(media.url, join(twitterFilePath, url.parse(media.url).pathname));
+        } else if (type == 'video') {
+          downloadFile(media.preview_image_url, join(twitterFilePath, url.parse(media.preview_image_url).pathname));
+
+          const videoUrl = findMaxBitRateMp4Url(media);
+          downloadFile(videoUrl, join(twitterVideoPath, url.parse(videoUrl).pathname));
         }
-        // TODO: video
       });
     }
 
@@ -94,6 +94,23 @@ export async function fetchTwitterUserLiked() {
       paginationToken = data.meta.next_token;
     }
   }
+}
+
+function findMaxBitRateMp4Url(media: any) {
+  let result = null;
+  let bitRate = 0;
+  media.variants.forEach((variant: any) => {
+    if (variant.content_type == 'video/mp4' && variant.bit_rate > bitRate) {
+      bitRate = variant.bit_rate;
+      result = variant.url;
+    }
+  });
+
+  if (result === null) {
+    console.warn('Can not find video. (media: ' + media.media_key + ')');
+  }
+
+  return result;
 }
 
 export async function getTweet(beforeId: string | null, beforeCreatedAt: string | null) {

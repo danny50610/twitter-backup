@@ -62,6 +62,23 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
   }
 }
 
+function findMaxBitRateMp4Url(media: any) {
+  let result = null;
+  let bitRate = 0;
+  media.data.variants.forEach((variant: any) => {
+    if (variant.content_type == 'video/mp4' && variant.bit_rate > bitRate) {
+      bitRate = variant.bit_rate;
+      result = variant.url;
+    }
+  });
+
+  if (result === null) {
+    console.warn('Can not find video. (media: ' + media.id + ')');
+  }
+
+  return result;
+}
+
 </script>
 
 <template>
@@ -91,12 +108,18 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
                   <span class="text-secondary me-1">·</span>
                   <span>{{ tweet.tweet.data.created_at }}</span>
                 </div>
+
                 <p style="white-space: pre-wrap;" class="card-text">{{ tweet.tweet.data.text }}</p>
+
                 <div v-for="media in tweet.media" :key="media.id" class="media-photo">
-                  <img v-if="media.data?.url" :src="('twitter-file://' + media.data.url)" class="rounded"
+                  <img v-if="media.data?.type == 'photo'" :src="'twitter-file://' + media.data.url" class="rounded"
                        :height="media.data.height"
                        :width="media.data.width"
                   >
+
+                  <video v-else-if="media.data?.type == 'video'" controls muted>
+                    <source :src="'twitter-video://' + findMaxBitRateMp4Url(media)" type="video/mp4">
+                  </video>
                 </div>
               </div>
             </div>
@@ -118,6 +141,12 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
   height: 100%;
   width: 100%;
   object-fit: contain;
+}
+
+.media-photo video {
+  height: 100%;
+  width: 100%;
+  object-fit: full;
 }
 
 .sentinel {

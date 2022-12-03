@@ -3,7 +3,7 @@ import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import { closeDatabase, initDatabase } from './database';
 import { fetchTwitterUserLiked, getTweet } from './twitter';
-import { initConfig, twitterFilePath } from './config';
+import { initConfig, twitterFilePath, twitterVideoPath } from './config';
 const url = require('node:url');
 
 /**
@@ -85,6 +85,20 @@ app
       let requestUrl = request.url.replace('twitter-file://', '');
       requestUrl = url.parse(requestUrl).pathname;
       requestUrl = twitterFilePath + '/' + requestUrl;
+
+      try {
+        return callback(requestUrl);
+      }
+      catch (error) {
+        console.error(error);
+        return callback('404');
+      }
+    });
+
+    protocol.registerFileProtocol('twitter-video', (request, callback) => {
+      let requestUrl = request.url.replace('twitter-video://', '');
+      requestUrl = url.parse(requestUrl).pathname;
+      requestUrl = twitterVideoPath + '/' + requestUrl;
 
       try {
         return callback(requestUrl);
