@@ -1,6 +1,6 @@
 {
   "name": "twitter-backup",
-  "description": "WIP",
+  "description": "Backup your favorite tweets",
   "version": "1.0.2",
   "private": true,
   "author": {
