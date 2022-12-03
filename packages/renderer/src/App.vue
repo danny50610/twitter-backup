@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { fetchTwitterUserLiked, getTweet } from '#preload';
 
 const tweetList = reactive([]);
 
@@ -20,8 +21,8 @@ onUnmounted(() => {
   }
 });
 
-async function fetchTwitterUserLiked() {
-  await window.electronAPI.fetchTwitterUserLiked();
+async function doFetchTwitterUserLiked() {
+  await fetchTwitterUserLiked();
   console.log('Done');
 }
 
@@ -36,7 +37,7 @@ async function loadTweet() {
     beforeCreatedAt =  tweetList[tweetLength - 1].tweet.data.created_at;
   }
 
-  let tweets = await window.electronAPI.getTweet(beforeId, beforeCreatedAt);
+  let tweets = await getTweet(beforeId, beforeCreatedAt);
   tweets.forEach((tweet: any) => {
     tweetList.push(tweet);
   });
@@ -86,7 +87,7 @@ function findMaxBitRateMp4Url(media: any) {
     <h1>Twitter Backup</h1>
     <button
       class="btn btn-primary"
-      @click="fetchTwitterUserLiked"
+      @click="doFetchTwitterUserLiked"
     >
       開始備份
     </button>

@@ -1,6 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  fetchTwitterUserLiked: () => ipcRenderer.invoke('fetchTwitterUserLiked'),
-  getTweet: (beforeId: string | null = null, beforeCreatedAt: string | null = null) => ipcRenderer.invoke('getTweet', beforeId, beforeCreatedAt),
-});
+export function fetchTwitterUserLiked() {
+  return ipcRenderer.invoke('fetchTwitterUserLiked');
+}
+
+export function getTweet(beforeId: string | null = null, beforeCreatedAt: string | null = null) {
+  return ipcRenderer.invoke('getTweet', beforeId, beforeCreatedAt);
+}
