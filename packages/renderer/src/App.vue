@@ -78,18 +78,22 @@ function handleIntersection([entry]: IntersectionObserverEntry[]) {
         <div class="card my-2" v-for="tweet in tweetList" :key="tweet.tweet.id">
           <div class="card-body">
             <div class="d-flex">
-              <div class="user">AAA</div>
+              <div class="user">
+                <img :src="('twitter-file://' + tweet.user.data.profile_image_url)"
+                    class="rounded-circle"
+                  >
+              </div>
               <div class="tweet-content">
                 <div class="mb-2">
                   <!-- FIXME: overflow -->
-                  <span class="me-1">{{ tweet.user.data.name }}</span>
-                  <span class="me-1">@{{ tweet.user.data.username }}</span>
-                  <span class="me-1">·</span>
+                  <span class="fw-bold me-1">{{ tweet.user.data.name }}</span>
+                  <span class="text-secondary me-1">@{{ tweet.user.data.username }}</span>
+                  <span class="text-secondary me-1">·</span>
                   <span>{{ tweet.tweet.data.created_at }}</span>
                 </div>
                 <p style="white-space: pre-wrap;" class="card-text">{{ tweet.tweet.data.text }}</p>
                 <div v-for="media in tweet.media" :key="media.id" class="media-photo">
-                  <img v-if="media.data?.url" :src="('media-photo://' + media.data.filename)" class="rounded"
+                  <img v-if="media.data?.url" :src="('twitter-file://' + media.data.url)" class="rounded"
                        :height="media.data.height"
                        :width="media.data.width"
                   >

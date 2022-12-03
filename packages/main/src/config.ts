@@ -1,9 +1,9 @@
 import { join } from 'path';
 const fs = require('node:fs');
 
-export let photoPath: string;
+export let twitterFilePath: string;
 
 export function initConfig(appPath: string) {
-  photoPath = join(appPath, 'media', 'photo');
-  fs.mkdirSync(photoPath, { recursive: true });
+  twitterFilePath = join(appPath, 'twitter-file');
+  fs.mkdirSync(twitterFilePath, { recursive: true });
 }

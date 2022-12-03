@@ -3,7 +3,8 @@ import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 import { closeDatabase, initDatabase } from './database';
 import { fetchTwitterUserLiked, getTweet } from './twitter';
-import { initConfig, photoPath } from './config';
+import { initConfig, twitterFilePath } from './config';
+const url = require('node:url');
 
 /**
  * Prevent electron from running multiple instances.
@@ -80,10 +81,13 @@ app
     ipcMain.handle('fetchTwitterUserLiked', fetchTwitterUserLiked);
     ipcMain.handle('getTweet', (_event, ...args) => { return getTweet(args[0], args[1]); });
 
-    protocol.registerFileProtocol('media-photo', (request, callback) => {
-      const url = request.url.replace('media-photo://', photoPath + '/');
+    protocol.registerFileProtocol('twitter-file', (request, callback) => {
+      let requestUrl = request.url.replace('twitter-file://', '');
+      requestUrl = url.parse(requestUrl).pathname;
+      requestUrl = twitterFilePath + '/' + requestUrl;
+
       try {
-        return callback(url);
+        return callback(requestUrl);
       }
       catch (error) {
         console.error(error);

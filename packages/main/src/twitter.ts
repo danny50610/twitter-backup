@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { addMedia, addTweet, addUser, getTweetPagination } from './database';
-import { join } from 'node:path';
-import { photoPath } from './config';
+import { join, dirname } from 'node:path';
+import { twitterFilePath } from './config';
 const fs = require('node:fs');
 const url = require('node:url');
 
@@ -69,16 +69,8 @@ export async function fetchTwitterUserLiked() {
         //   - photo
         //   - video
         if (type == 'photo') {
-          const filename = url.parse(media.url).pathname.split('/').at(-1);
-          media.filename = filename;
-
           addMedia(media.media_key, media);
-
-          const mediaResponse = await axios.get(media.url, {
-            responseType: 'arraybuffer',
-          });
-
-          fs.writeFileSync(join(photoPath, filename), mediaResponse.data);
+          downloadFile(media.url, join(twitterFilePath, url.parse(media.url).pathname));
         }
         // TODO: video
       });
@@ -87,6 +79,7 @@ export async function fetchTwitterUserLiked() {
     if (data?.includes?.users) {
       data.includes.users.forEach(async (user: any) => {
         addUser(user.id, user);
+        downloadFile(user.profile_image_url, join(twitterFilePath, url.parse(user.profile_image_url).pathname));
       });
     }
 
@@ -107,3 +100,15 @@ export async function getTweet(beforeId: string | null, beforeCreatedAt: string 
   return await getTweetPagination(beforeId, beforeCreatedAt);
 }
 
+async function downloadFile(url: string, savePath: string ) {
+  const dirName = dirname(savePath);
+  if (!fs.existsSync(dirName)) {
+    fs.mkdirSync(dirName, { recursive: true });
+  }
+
+  const response = await axios.get(url, {
+    responseType: 'arraybuffer',
+  });
+
+  fs.writeFileSync(savePath, response.data);
+}
