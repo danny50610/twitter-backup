@@ -2,6 +2,8 @@
 
 Backup your favorite tweets
 
+![](.art/screenshot.jpg)
+
 ## TODO
 - [ ] Tweet show page
 - [ ] API token Settings page
