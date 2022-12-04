@@ -2,9 +2,9 @@
 import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { fetchTwitterUserLiked, getTweet } from '#preload';
 
-const tweetList = reactive([]);
+const tweetList: any[] = reactive([]);
 
-let tweetEndObserver;
+let tweetEndObserver: any;
 let isLoadingMore = false;
 
 onMounted(() => {
@@ -45,7 +45,7 @@ async function loadTweet() {
   isLoadingMore = false;
 }
 
-const sentinel = ref(null);
+const sentinel: any = ref(null);
 function setUpInterSectionObserver() {
   tweetEndObserver = new IntersectionObserver(
     handleIntersection,
